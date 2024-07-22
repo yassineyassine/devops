@@ -92,3 +92,5 @@ Add Maven and save it.
 After that, go to the dashboard then click new item to create a job. Give the job a name and then select Pipeline.
 
 
+After that, go to the dashboard then click new item to create a job. Give the job a name and then select Pipeline.
+
