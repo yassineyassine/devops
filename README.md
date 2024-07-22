@@ -18,3 +18,13 @@ After logging in, Sonarqube will direct you to the password update page. Fill in
 
 Set up project with the global setting and click Create Project.
 
+After creating a new project, select and click 'Locally' to start analyzing the project.
+
+sqp_ec87a46dddbee9d64b3b0329423a15822f748115
+
+After clicking 'Continue' select the build. Because I am using a Maven project, we choose Maven.
+
+
+
+
+
