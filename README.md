@@ -11,4 +11,5 @@ We access port 50000, Jenkins provides this information as part of the JNLP hand
 On the docker desktop, we can see that docker-compose has started running.
 
 C. Setup Sonarqube
+
 After docker-compose is running, we access Sonarqube via the link : 'http://localhost:9000'. This will display the login page for Sonarqube on the web. Fill in the first login with the default configuration, namely 'admin' in both the login and password fields
