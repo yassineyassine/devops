@@ -61,4 +61,10 @@ Fill in all the columns and click 'Save and Continue'.
 
 
 
+Click 'Save and Finish' with default URL. Click 'Start Jenkins', then we will be directed to the Jenkins Dashboard page.
+
+Choose manage jenkins and click plugins.
+
+Search for SonarQube Scanner and click install. Conveniently there is a Jenkins restart button. Click Restart Jenkins.
+
 
