@@ -22,6 +22,10 @@ After creating a new project, select and click 'Locally' to start analyzing the 
 
 sqp_ec87a46dddbee9d64b3b0329423a15822f748115
 
+Running our project with: 'mvn clean verify sonar:sonar'
+
+
+
 After clicking 'Continue' select the build. Because I am using a Maven project, we choose Maven.
 
 
@@ -31,7 +35,7 @@ mvn clean verify sonar:sonar \
   -Dsonar.host.url=http://localhost:9000 \
   -Dsonar.token=sqp_ec87a46dddbee9d64b3b0329423a15822f748115
 
-Add it to pom.xml in <properties></properties>.
+3)Add it to pom.xml in <properties></properties>.
 
 
 
