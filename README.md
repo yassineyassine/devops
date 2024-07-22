@@ -15,3 +15,6 @@ C. Setup Sonarqube
 After docker-compose is running, we access Sonarqube via the link : 'http://localhost:9000'. This will display the login page for Sonarqube on the web. Fill in the first login with the default configuration, namely 'admin' in both the login and password fields
 
 After logging in, Sonarqube will direct you to the password update page. Fill in the password update and don't forget it
+
+Set up project with the global setting and click Create Project.
+
