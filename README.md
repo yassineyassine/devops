@@ -94,3 +94,7 @@ After that, go to the dashboard then click new item to create a job. Give the jo
 
 After that, go to the dashboard then click new item to create a job. Give the job a name and then select Pipeline.
 
+Go to the General section and provide your Git repo URL.
+
+
+
