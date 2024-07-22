@@ -54,10 +54,10 @@ Fill in all the columns and click 'Save and Continue'.
 
 Click 'Save and Finish' with default URL. Click 'Start Jenkins', then we will be directed to the Jenkins Dashboard page.
 
-![1712202119002](https://github.com/user-attachments/assets/ccf4e68e-fec7-418e-975d-9032dee9fa55)
 
 Fill in all the columns and click 'Save and Continue'.
 
+![1712202119002](https://github.com/user-attachments/assets/ccf4e68e-fec7-418e-975d-9032dee9fa55)
 
 
 
