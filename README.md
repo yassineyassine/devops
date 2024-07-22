@@ -31,6 +31,8 @@ mvn clean verify sonar:sonar \
   -Dsonar.host.url=http://localhost:9000 \
   -Dsonar.token=sqp_ec87a46dddbee9d64b3b0329423a15822f748115
 
+Add it to pom.xml in <properties></properties>.
+
 
 
 
