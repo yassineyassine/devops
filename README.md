@@ -82,5 +82,13 @@ Search for SonarQube Scanner and click install. Conveniently there is a Jenkins 
 
 Go to Manage Jenkins — Tools. Add the Java home. Here i use Open JDK Zulu(17.0.10).
 
+
+Add Sonarqube Scanner
+
+
+
 Add Maven and save it.
+
+After that, go to the dashboard then click new item to create a job. Give the job a name and then select Pipeline.
+
 
