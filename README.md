@@ -35,6 +35,9 @@ mvn clean verify sonar:sonar \
   -Dsonar.host.url=http://localhost:9000 \
   -Dsonar.token=sqp_ec87a46dddbee9d64b3b0329423a15822f748115
 
+  D. Setup Jenkins
+We will access jenkins with 'http://localhost:8080/'. This will display the Unlock Jenkins page.
+
 3)Add it to pom.xml in <properties></properties>.
 
 4)After that, go to Sonarqube again and look in the Overview Menu section. Congratulations, our sonarqube has been analyzed as shown below.
