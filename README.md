@@ -42,5 +42,23 @@ We will access jenkins with 'http://localhost:8080/'. This will display the Unlo
 
 4)After that, go to Sonarqube again and look in the Overview Menu section. Congratulations, our sonarqube has been analyzed as shown below.
 
+We can get the administrator password via the Jenkins container log.
+
+After we login, we will be directed to the Customize Zenkins page.
+
+Choose install suggested plugins. After that you will be directed to create a new Jenkins account.
+
+Fill in all the columns and click 'Save and Continue'.
+
+Fill in all the columns and click 'Save and Continue'.
+
+Click 'Save and Finish' with default URL. Click 'Start Jenkins', then we will be directed to the Jenkins Dashboard page.
+
+![1712202119002](https://github.com/user-attachments/assets/ccf4e68e-fec7-418e-975d-9032dee9fa55)
+
+Fill in all the columns and click 'Save and Continue'.
+
+
+
 
 
