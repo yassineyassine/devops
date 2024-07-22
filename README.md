@@ -66,9 +66,21 @@ Click 'Save and Finish' with default URL. Click 'Start Jenkins', then we will be
 Choose manage jenkins and click plugins.
 
 Check whether the plugin is enabled.
+Go back to the Manage Jenkins page, then click Credentials. Click System and then click Global Credentials to add New Credentials. The results are as below.
+
+Select "Kind" with "Secret text," then fill in the "Secret" field with the SonarQube token. Next, fill in the "ID" and "Description" fields with "sonar-token." Click create.
+
+
+
+Go back to the Manage Jenkins page, then click System. Find sonarqube server. Fill the forms with Name:'SonarQube', serverURL:'http://sonarqube:9000' and sonar-token.
+
 
 
 
 Search for SonarQube Scanner and click install. Conveniently there is a Jenkins restart button. Click Restart Jenkins.
 
+
+Go to Manage Jenkins — Tools. Add the Java home. Here i use Open JDK Zulu(17.0.10).
+
+Add Maven and save it.
 
