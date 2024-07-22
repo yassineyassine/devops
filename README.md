@@ -37,6 +37,7 @@ mvn clean verify sonar:sonar \
 
 3)Add it to pom.xml in <properties></properties>.
 
+4)After that, go to Sonarqube again and look in the Overview Menu section. Congratulations, our sonarqube has been analyzed as shown below.
 
 
 
