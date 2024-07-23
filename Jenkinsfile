@@ -3,10 +3,10 @@ pipeline {
     environment {
         BRANCHE_DEV = 'origin/develop'
         BRANCHE_PROD = 'origin/main'
-        NEXUS_DOCKER_REGISTRY = "http://prod.local:5003"
+        NEXUS_DOCKER_REGISTRY = "http://localhost:5003"
         NEXUS_CREDENTIALS_ID = "nexus-credentials"
         DOCKER_IMAGE_NAME = "devops-project-samples"
-        DOCKER_IMAGE_TAG = "prod.local:5003"
+        DOCKER_IMAGE_TAG = "localhost:5003"
     }
     stages {
         stage('Checkout') {
