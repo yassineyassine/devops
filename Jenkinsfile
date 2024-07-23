@@ -1,65 +1,118 @@
 pipeline {
     agent any
-    tools {
-        maven 'jenkins-maven'
-    }
     environment {
-        BUILD_NUMBER_ENV = "${env.BUILD_NUMBER}"
-        TEXT_SUCCESS_BUILD = "[#${env.BUILD_NUMBER}] Project: ${JOB_NAME} build Success"
-        TEXT_FAILURE_BUILD = "[#${env.BUILD_NUMBER}] Project: ${JOB_NAME} build Failure"
+        BRANCHE_DEV = 'origin/develop'
+        BRANCHE_PROD = 'origin/main'
+        NEXUS_DOCKER_REGISTRY = "http://prod.local:5003"
+        NEXUS_CREDENTIALS_ID = "nexus-credentials"
+        DOCKER_IMAGE_NAME = "devops-project-samples"
+        DOCKER_IMAGE_TAG = "prod.local:5003"
     }
-    
     stages {
-        stage('SonarQube Analysis') {
+        stage('Checkout') {
             steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh 'mvn clean install'
-                    sh 'mvn clean package verify sonar:sonar'
-                    echo 'SonarQube Analysis Completed'
-                }
+                checkout scm
+                echo 'Pulling... ' + env.GIT_BRANCH
             }
         }
 
-        stage("Quality Gate") {
+        stage('Tests') {
             steps {
-                waitForQualityGate abortPipeline: true
-                echo 'Quality Gate Completed'
+                sh 'mvn test'
             }
         }
 
-         stage('Build Docker Image') {
+        stage('Sonarqube Analysis') {
             steps {
                 script {
-                    bat 'docker build -t aandocker629/tpm-springboot-1.0 .'
-                    echo 'Build Docker Image Completed'
-                }
-            }
-        }
-
-        stage('Docker Push') {
-            steps {
-                script {
-                    withCredentials([string(credentialsId: 'dockerhub-pwd', variable: 'dockerhub-password')]) {
-                        bat ''' docker login -u aandocker629 -p "%dockerhub-password%" '''
+                    withSonarQubeEnv('sonar-server') {
+                        sh "mvn sonar:sonar -Dintegration-tests.skip=true -Dmaven.test.failure.ignore=true"
                     }
-                    bat 'docker push aandocker629/tpm-springboot-1.0'
+                    timeout(time: 1, unit: 'MINUTES') {
+                        def qg = waitForQualityGate()
+                        if (qg.status != 'OK') {
+                            error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                        }
+                    }
                 }
+
             }
         }
 
-        stage ('Docker Run') {
+        stage('Maven Build and Package') {
             steps {
                 script {
-                    bat 'docker run -d --name tpm-springboot-1.0 -p 8099:8080 aandocker629/tpm-springboot-1.0'
-                    echo 'Docker Run Completed'
+                    sh 'mvn clean package -DskipTests'
+                }
+            }
+            post {
+                success {
+                    archiveArtifacts 'target/*.jar'
+                }
+            }
+        }
+        stage('Docker Build and Push to Nexus') {
+            steps {
+                script {
+                    envName = "dev"
+                    if(env.GIT_BRANCH == BRANCHE_PROD) {
+                        envName = "prod"
+                    }
+                    envVersion  =  getEnvVersion(envName)
+                    withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIALS_ID}", usernameVariable: 'USER', passwordVariable: 'PASSWORD')]){
+                        sh 'echo $PASSWORD | docker login -u $USER --password-stdin $NEXUS_DOCKER_REGISTRY'
+                        sh 'docker system prune -af'
+                        sh "docker build -t $DOCKER_IMAGE_TAG/$DOCKER_IMAGE_NAME:$envVersion --no-cache --pull ."
+                        sh "docker push $DOCKER_IMAGE_TAG/$DOCKER_IMAGE_NAME:$envVersion"
+                    }
+                }
+            }
+        }
+        stage('Ansible job staging') {
+            when {
+                expression { env.GIT_BRANCH == BRANCHE_DEV }
+            }
+            steps {
+                script {
+                    def targetVersion = getEnvVersion("dev")
+                    sshagent(credentials: ['ansible-node-manager']) {
+                        sh "ssh user-ansible@192.168.1.173 'cd ansible-projects/devops-ansible-deployment && ansible-playbook -i 00_inventory.yml -l staging deploy_playbook.yml --vault-password-file ~/.passvault.txt -e \"docker_image_tag=${targetVersion}\"'"
+                    }
+                }
+            }
+        }
+
+        stage('Ansible job production') {
+            when {
+                expression { env.GIT_BRANCH == BRANCHE_PROD }
+            }
+            steps {
+                script {
+                    def targetVersion = getEnvVersion("prod")
+                    sshagent(credentials: ['github-credentials']) {
+                        sh "git tag -f v${targetVersion}"
+                        sh "git push origin --tags HEAD:develop"
+                    }
+                    sshagent(credentials: ['ansible-node-manager']) {
+                        sh "ssh user-ansible@192.168.1.173 'cd ansible-projects/devops-ansible-deployment && ansible-playbook -i 00_inventory.yml -l production deploy_playbook.yml --vault-password-file ~/.passvault.txt -e \"docker_image_tag=${targetVersion}\"'"
+                    }
                 }
             }
         }
     }
-
-    post {
-        always {
-            bat 'docker logout'
-        }
+}
+def getEnvVersion(envName) {
+    def pom = readMavenPom file: 'pom.xml'
+    // get the current development version
+    artifactVersion = "${pom.version}"
+    def gitCommit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+    def versionNumber;
+    if (gitCommit == null) {
+        versionNumber =artifactVersion+"-${envName}."+env.BUILD_NUMBER;
+    } else {
+        versionNumber =artifactVersion+"-${envName}."+env.BUILD_NUMBER+'.'+gitCommit.take(8);
     }
+    print 'build ${environnement} versions...'
+    print versionNumber
+    return versionNumber
 }
