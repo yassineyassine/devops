@@ -1,58 +1,36 @@
 pipeline {
     agent any
+    tools {
+        maven 'jenkins-maven'
+    }
     environment {
-        BRANCHE_DEV = 'origin/develop'
-        BRANCHE_PROD = 'origin/main'
-        NEXUS_DOCKER_REGISTRY = "http://localhost:5003"
-        NEXUS_CREDENTIALS_ID = "nexus-credentials"
-        DOCKER_IMAGE_NAME = "devops-project-samples"
-        DOCKER_IMAGE_TAG = "localhost:5003"
+        BUILD_NUMBER_ENV = "${env.BUILD_NUMBER}"
+        TEXT_SUCCESS_BUILD = "[#${env.BUILD_NUMBER}] Project: ${JOB_NAME} build Success"
+        TEXT_FAILURE_BUILD = "[#${env.BUILD_NUMBER}] Project: ${JOB_NAME} build Failure"
     }
+    
     stages {
-        stage('Checkout') {
+        // stage('Git Checkout') {
+        //     steps {
+        //         checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/aan629/TajilProductManagement-For-SimulationJenkinsWithSonarqube']])
+        //         bat 'mvn clean install'
+        //         echo 'Git Checkout Completed'
+        //     }
+        // }
+        stage('SonarQube Analysis') {
             steps {
-                checkout scm
-                echo 'Pulling... ' + env.GIT_BRANCH
-            }
-        }
-
-        stage('Tests') {
-            steps {
-                sh 'mvn test'
-            }
-        }
-
-        stage('Sonarqube Analysis') {
-            steps {
-                script {
-                    withSonarQubeEnv('sonar-server') {
-                        sh "mvn sonar:sonar -Dintegration-tests.skip=true -Dmaven.test.failure.ignore=true"
-                    }
-                    timeout(time: 1, unit: 'MINUTES') {
-                        def qg = waitForQualityGate()
-                        if (qg.status != 'OK') {
-                            error "Pipeline aborted due to quality gate failure: ${qg.status}"
-                        }
-                    }
+                withSonarQubeEnv('SonarQube') {
+                    sh 'mvn clean install'
+                    sh 'mvn clean package verify sonar:sonar'
+                    echo 'SonarQube Analysis Completed'
                 }
-
             }
         }
-
+        stage("Quality Gate") {
+            steps {
+                waitForQualityGate abortPipeline: true
+                echo 'Quality Gate Completed'
+            }
+        }
     }
-}
-def getEnvVersion(envName) {
-    def pom = readMavenPom file: 'pom.xml'
-    // get the current development version
-    artifactVersion = "${pom.version}"
-    def gitCommit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-    def versionNumber;
-    if (gitCommit == null) {
-        versionNumber =artifactVersion+"-${envName}."+env.BUILD_NUMBER;
-    } else {
-        versionNumber =artifactVersion+"-${envName}."+env.BUILD_NUMBER+'.'+gitCommit.take(8);
-    }
-    print 'build ${environnement} versions...'
-    print versionNumber
-    return versionNumber
 }
