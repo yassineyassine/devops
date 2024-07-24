@@ -1,23 +1,17 @@
+version: "3.7"
 services:
-  sonarqube:
-    image: sonarqube:latest
-    ports:
-      - 9000:9000
+  nexus:
+    image: sonatype/nexus3
+    expose:
+      - 8081
+      - 8082
+      - 8083
+    restart: always
     volumes:
-      - sonarqube_data:/opt/sonarqube/data
-      - sonarqube_extensions:/opt/sonarqube/extensions
-      - sonarqube_logs:/opt/sonarqube/logs
-
-  jenkins:
-    image: jenkins/jenkins:lts
+      - "nexus-work:/sonatype-work"
     ports:
-      - 8080:8080
-      - 50000:50000
-    volumes:
-      - jenkins_home:/var/jenkins_home
-
+      - "5001:8081"
+      - "5002:8082"
+      - "5003:8083"
 volumes:
-  sonarqube_data:
-  sonarqube_extensions:
-  sonarqube_logs:
-  jenkins_home:
+  nexus-work: {}
