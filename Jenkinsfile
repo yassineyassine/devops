@@ -71,3 +71,18 @@ pipeline {
         
     }
 }
+def getEnvVersion(envName) {
+    def pom = readMavenPom file: 'pom.xml'
+    // get the current development version
+    artifactVersion = "${pom.version}"
+    def gitCommit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+    def versionNumber;
+    if (gitCommit == null) {
+        versionNumber =artifactVersion+"-${envName}."+env.BUILD_NUMBER;
+    } else {
+        versionNumber =artifactVersion+"-${envName}."+env.BUILD_NUMBER+'.'+gitCommit.take(8);
+    }
+    print 'build ${environnement} versions...'
+    print versionNumber
+    return versionNumber
+}
