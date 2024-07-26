@@ -38,6 +38,19 @@ pipeline {
                 echo 'Quality Gate Completed'
             }
         }
+
+         stage('Maven Build and Package') {
+            steps {
+                script {
+                    sh 'mvn clean package -DskipTests'
+                }
+            }
+            post {
+                success {
+                    archiveArtifacts 'target/*.jar'
+                }
+            }
+        }
     stage('Docker Build and Push to Nexus') {
             steps {
                 script {
