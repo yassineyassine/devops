@@ -49,7 +49,7 @@ pipeline {
         }
         
 
-        sta
+   
     }
 }
 def getEnvVersion(envName) {
