@@ -31,7 +31,7 @@ pipeline {
             }
             envVersion  =  getEnvVersion(envName)
             withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIALS_ID}", usernameVariable: 'USER', passwordVariable: 'PASSWORD')]){
-                sh 'echo $PASSWORD | docker login -u $USER --password-stdin $NEXUS_DOCKER_REGISTRY'
+                sh 'echo docker login -u $USER -p yassine $NEXUS_DOCKER_REGISTRY'
                 sh 'docker system prune -af'
                 sh "docker build -t $DOCKER_IMAGE_TAG/$DOCKER_IMAGE_NAME:$envVersion --no-cache --pull ."
                 sh "docker push $DOCKER_IMAGE_TAG/$DOCKER_IMAGE_NAME:$envVersion"
