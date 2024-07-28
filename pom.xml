@@ -19,8 +19,8 @@
 		<!-- SonarQube properties -->
     	<sonar.projectKey>devops</sonar.projectKey>
     	<sonar.projectName>devops</sonar.projectName>
-    	<sonar.host.url>http://localhost:9000</sonar.host.url>
-    	<sonar.token>sqp_ec87a46dddbee9d64b3b0329423a15822f748115</sonar.token>
+    	<sonar.host.url>http://prod.local:9000</sonar.host.url>
+    	<sonar.token>sqp_49928bdba9bb592da5cfec661a8adb4e25172fc4</sonar.token>
 	</properties>
 	<dependencies>
 		<dependency>
