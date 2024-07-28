@@ -1,5 +1,8 @@
 pipeline {
     agent any
+     tools {
+        maven 'jenkins-maven'
+    }
     environment {
         BRANCHE_DEV = 'origin/develop'
         BRANCHE_PROD = 'origin/main'
