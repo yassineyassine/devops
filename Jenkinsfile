@@ -6,7 +6,7 @@ pipeline {
         NEXUS_DOCKER_REGISTRY = "http://prod.local:5003"
         NEXUS_CREDENTIALS_ID = "nexus-credentials"
         DOCKER_IMAGE_NAME = "devops-project-samples"
-        DOCKER_IMAGE_TAG = "prod.local:5003"
+        DOCKER_IMAGE_TAG = "prod.local:5002"
     }
     stages {
       
