@@ -17,44 +17,10 @@ pipeline {
     
     stages {
 
-        stage('Checkout') {
-            steps {
-                checkout scm
-                echo 'Pulling... ' + env.GIT_BRANCH
-            }
-        }
-
        
-         stage('Tests') {
-            steps {
-                sh 'mvn test'
-            }
-        }
 
-        stage('Sonarqube Analysis') {
-            steps {
-                script {
-                    withSonarQubeEnv('sonar-server') {
-                        sh "mvn sonar:sonar -Dintegration-tests.skip=true -Dmaven.test.failure.ignore=true"
-                    }
-                   
-                }
-
-            }
-        }
-
-        stage('Maven Build and Package') {
-            steps {
-                script {
-                    sh 'mvn clean package -DskipTests'
-                }
-            }
-            post {
-                success {
-                    archiveArtifacts 'target/*.jar'
-                }
-            }
-        }
+        
+       
 
         stage('Docker Build and Push to Nexus') {
     steps {
