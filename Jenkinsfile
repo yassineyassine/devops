@@ -40,7 +40,7 @@ pipeline {
                 echo 'Quality Gate Completed'
             }
         }
-    }
+    
 
         stage('Maven Build and Package') {
             steps {
