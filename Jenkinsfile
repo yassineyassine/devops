@@ -1,12 +1,6 @@
 pipeline {
     agent any
-    tools {
-        maven 'jenkins-maven'
-    }
     environment {
-        BUILD_NUMBER_ENV = "${env.BUILD_NUMBER}"
-        TEXT_SUCCESS_BUILD = "[#${env.BUILD_NUMBER}] Project: ${JOB_NAME} build Success"
-        TEXT_FAILURE_BUILD = "[#${env.BUILD_NUMBER}] Project: ${JOB_NAME} build Failure"
         BRANCHE_DEV = 'origin/develop'
         BRANCHE_PROD = 'origin/main'
         NEXUS_DOCKER_REGISTRY = "http://prod.local:5003"
@@ -14,12 +8,22 @@ pipeline {
         DOCKER_IMAGE_NAME = "devops-project-samples"
         DOCKER_IMAGE_TAG = "prod.local:5003"
     }
-    
     stages {
+      
 
-       
-
-         stage('Docker Build and Push to Nexus') {
+        stage('Maven Build and Package') {
+            steps {
+                script {
+                    sh 'mvn clean package -DskipTests'
+                }
+            }
+            post {
+                success {
+                    archiveArtifacts 'target/*.jar'
+                }
+            }
+        }
+        stage('Docker Build and Push to Nexus') {
             steps {
                 script {
                     envName = "dev"
@@ -28,7 +32,7 @@ pipeline {
                     }
                     envVersion  =  getEnvVersion(envName)
                     withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIALS_ID}", usernameVariable: 'USER', passwordVariable: 'PASSWORD')]){
-                        sh 'docker login -u $USER -p yassine $NEXUS_DOCKER_REGISTRY' --profile
+                        sh 'echo $PASSWORD | docker login -u $USER --password-stdin $NEXUS_DOCKER_REGISTRY'
                         sh 'docker system prune -af'
                         sh "docker build -t $DOCKER_IMAGE_TAG/$DOCKER_IMAGE_NAME:$envVersion --no-cache --pull ."
                         sh "docker push $DOCKER_IMAGE_TAG/$DOCKER_IMAGE_NAME:$envVersion"
@@ -36,7 +40,37 @@ pipeline {
                 }
             }
         }
-        
+        stage('Ansible job staging') {
+            when {
+                expression { env.GIT_BRANCH == BRANCHE_DEV }
+            }
+            steps {
+                script {
+                    def targetVersion = getEnvVersion("dev")
+                    sshagent(credentials: ['ansible-node-manager']) {
+                        sh "ssh user-ansible@192.168.1.173 'cd ansible-projects/devops-ansible-deployment && ansible-playbook -i 00_inventory.yml -l staging deploy_playbook.yml --vault-password-file ~/.passvault.txt -e \"docker_image_tag=${targetVersion}\"'"
+                    }
+                }
+            }
+        }
+
+        stage('Ansible job production') {
+            when {
+                expression { env.GIT_BRANCH == BRANCHE_PROD }
+            }
+            steps {
+                script {
+                    def targetVersion = getEnvVersion("prod")
+                    sshagent(credentials: ['github-credentials']) {
+                        sh "git tag -f v${targetVersion}"
+                        sh "git push origin --tags HEAD:develop"
+                    }
+                    sshagent(credentials: ['ansible-node-manager']) {
+                        sh "ssh user-ansible@192.168.1.173 'cd ansible-projects/devops-ansible-deployment && ansible-playbook -i 00_inventory.yml -l production deploy_playbook.yml --vault-password-file ~/.passvault.txt -e \"docker_image_tag=${targetVersion}\"'"
+                    }
+                }
+            }
+        }
     }
 }
 def getEnvVersion(envName) {
