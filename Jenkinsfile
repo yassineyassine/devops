@@ -19,17 +19,23 @@ pipeline {
 
        
 
-        
-       
-
-        stage('Docker Build and Push to Nexus') {
-    steps {
-        script {
-                            sh 'docker push prod.local:5003/devops-project-samples:0.0.1-SNAPSHOT-prod.21.2ce1c6a0'
-            
+         stage('Docker Build and Push to Nexus') {
+            steps {
+                script {
+                    envName = "dev"
+                    if(env.GIT_BRANCH == BRANCHE_PROD) {
+                        envName = "prod"
+                    }
+                    envVersion  =  getEnvVersion(envName)
+                    withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIALS_ID}", usernameVariable: 'USER', passwordVariable: 'PASSWORD')]){
+                        sh 'docker login -u $USER -p yassine $NEXUS_DOCKER_REGISTRY' --profile
+                        sh 'docker system prune -af'
+                        sh "docker build -t $DOCKER_IMAGE_TAG/$DOCKER_IMAGE_NAME:$envVersion --no-cache --pull ."
+                        sh "docker push $DOCKER_IMAGE_TAG/$DOCKER_IMAGE_NAME:$envVersion"
+                    }
+                }
+            }
         }
-    }
-}
         
     }
 }
