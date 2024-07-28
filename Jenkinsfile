@@ -6,7 +6,7 @@ pipeline {
         NEXUS_DOCKER_REGISTRY = "http://prod.local:5003"
         NEXUS_CREDENTIALS_ID = "nexus-credentials"
         DOCKER_IMAGE_NAME = "devops-project-samples"
-        DOCKER_IMAGE_TAG = "prod.local:5002"
+        DOCKER_IMAGE_TAG = "prod.local:5003"
     }
     stages {
         stage('Checkout') {
@@ -16,7 +16,8 @@ pipeline {
             }
         }
 
-      
+     
+       
 
         stage('Maven Build and Package') {
             steps {
@@ -39,7 +40,7 @@ pipeline {
                     }
                     envVersion  =  getEnvVersion(envName)
                     withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIALS_ID}", usernameVariable: 'USER', passwordVariable: 'PASSWORD')]){
-                        sh 'docker login -u $USER -p yassine $NEXUS_DOCKER_REGISTRY'
+                        sh 'echo $PASSWORD | docker login -u $USER --password-stdin $NEXUS_DOCKER_REGISTRY'
                         sh 'docker system prune -af'
                         sh "docker build -t $DOCKER_IMAGE_TAG/$DOCKER_IMAGE_NAME:$envVersion --no-cache --pull ."
                         sh "docker push $DOCKER_IMAGE_TAG/$DOCKER_IMAGE_NAME:$envVersion"
@@ -47,9 +48,21 @@ pipeline {
                 }
             }
         }
-        
+        stage('Ansible job staging') {
+            when {
+                expression { env.GIT_BRANCH == BRANCHE_DEV }
+            }
+            steps {
+                script {
+                    def targetVersion = getEnvVersion("dev")
+                    sshagent(credentials: ['ansible-node-manager']) {
+                        sh "ssh user-ansible@192.168.1.173 'cd ansible-projects/devops-ansible-deployment && ansible-playbook -i 00_inventory.yml -l staging deploy_playbook.yml --vault-password-file ~/.passvault.txt -e \"docker_image_tag=${targetVersion}\"'"
+                    }
+                }
+            }
+        }
 
-   
+        
     }
 }
 def getEnvVersion(envName) {
