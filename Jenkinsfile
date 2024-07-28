@@ -16,58 +16,24 @@ pipeline {
     }
     
     stages {
-        // stage('Git Checkout') {
-        //     steps {
-        //         checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/aan629/TajilProductManagement-For-SimulationJenkinsWithSonarqube']])
-        //         bat 'mvn clean install'
-        //         echo 'Git Checkout Completed'
-        //     }
-        // }
-        stage('SonarQube Analysis') {
+
+        stage('Checkout') {
             steps {
-                withSonarQubeEnv('sonar-server') {
-                    sh 'mvn clean install'
-                    sh 'mvn clean package verify sonar:sonar'
-                    echo 'SonarQube Analysis Completed'
-                }
-            }
-        }
-        stage("Quality Gate") {
-            steps {
-                waitForQualityGate abortPipeline: true
-                echo 'Quality Gate Completed'
+                checkout scm
+                echo 'Pulling... ' + env.GIT_BRANCH
             }
         }
 
-         stage('Maven Build and Package') {
+        stage('Tests') {
             steps {
-                script {
-                    sh 'mvn clean package -DskipTests'
-                }
-            }
-            post {
-                success {
-                    archiveArtifacts 'target/*.jar'
-                }
+                sh 'mvn test'
             }
         }
-    stage('Docker Build and Push to Nexus') {
-            steps {
-                script {
-                    envName = "dev"
-                    if(env.GIT_BRANCH == BRANCHE_PROD) {
-                        envName = "prod"
-                    }
-                    envVersion  =  getEnvVersion(envName)
-                    withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIALS_ID}", usernameVariable: 'USER', passwordVariable: 'PASSWORD')]){
-                        sh 'echo $PASSWORD | docker login -u $USER --password-stdin $NEXUS_DOCKER_REGISTRY'
-                        sh 'docker system prune -af'
-                        sh "docker build -t $DOCKER_IMAGE_TAG/$DOCKER_IMAGE_NAME:$envVersion --no-cache --pull ."
-                        sh "docker push $DOCKER_IMAGE_TAG/$DOCKER_IMAGE_NAME:$envVersion"
-                    }
-                }
-            }
-        }
+        
+       
+
+         
+    
         
     }
 }
