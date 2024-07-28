@@ -1,6 +1,6 @@
 pipeline {
     agent any
-     tools {
+    tools {
         maven 'jenkins-maven'
     }
     environment {
@@ -19,8 +19,28 @@ pipeline {
             }
         }
 
-     
-       
+        stage('Tests') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+
+        stage('Sonarqube Analysis') {
+            steps {
+                script {
+                    withSonarQubeEnv('sonar-server') {
+                        sh "mvn sonar:sonar -Dintegration-tests.skip=true -Dmaven.test.failure.ignore=true"
+                    }
+                    timeout(time: 1, unit: 'MINUTES') {
+                        def qg = waitForQualityGate()
+                        if (qg.status != 'OK') {
+                            error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                        }
+                    }
+                }
+
+            }
+        }
 
         stage('Maven Build and Package') {
             steps {
@@ -65,7 +85,23 @@ pipeline {
             }
         }
 
-        
+        stage('Ansible job production') {
+            when {
+                expression { env.GIT_BRANCH == BRANCHE_PROD }
+            }
+            steps {
+                script {
+                    def targetVersion = getEnvVersion("prod")
+                    sshagent(credentials: ['github-credentials']) {
+                        sh "git tag -f v${targetVersion}"
+                        sh "git push origin --tags HEAD:develop"
+                    }
+                    sshagent(credentials: ['ansible-node-manager']) {
+                        sh "ssh user-ansible@192.168.1.173 'cd ansible-projects/devops-ansible-deployment && ansible-playbook -i 00_inventory.yml -l production deploy_playbook.yml --vault-password-file ~/.passvault.txt -e \"docker_image_tag=${targetVersion}\"'"
+                    }
+                }
+            }
+        }
     }
 }
 def getEnvVersion(envName) {
