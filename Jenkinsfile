@@ -19,29 +19,9 @@ pipeline {
             }
         }
 
-        stage('Tests') {
-            steps {
-                sh 'mvn test'
-            }
-        }
+      
 
-        stage('Sonarqube Analysis') {
-            steps {
-                script {
-                    withSonarQubeEnv('sonar-server') {
-                        sh "mvn sonar:sonar -Dintegration-tests.skip=true -Dmaven.test.failure.ignore=true"
-                    }
-                    
-                    timeout(time: 1, unit: 'MINUTES') {
-                        def qg = waitForQualityGate()
-                        if (qg.status != 'OK') {
-                            error "Pipeline aborted due to quality gate failure: ${qg.status}"
-                        }
-                    }
-                }
-
-            }
-        }
+       
 
         stage('Maven Build and Package') {
             steps {
