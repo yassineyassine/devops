@@ -13,11 +13,18 @@ pipeline {
     }
     stages {
 
-sh '//...
-    git rev-parse --abbrev-ref HEAD > GIT_BRANCH'
-    git_branch = readFile('GIT_BRANCH').trim()
+
+
+         stage('Details') {
+            steps {
+                
+    sh "git rev-parse --abbrev-ref HEAD > GIT_BRANCH"
+    sh "git_branch = readFile('GIT_BRANCH').trim()"
     echo git_branch
-    //...
+    
+            }
+        }
+
         
         stage('Checkout') {
             steps {
