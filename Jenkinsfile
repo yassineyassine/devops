@@ -60,7 +60,7 @@ pipeline {
                 script {
                     def targetVersion = getEnvVersion("dev")
                     sshagent(credentials: ['ansible-node-manager']) {
-                        sh "ssh yassine@192.168.0.6 'cd ansible-projects/devops-ansible-deployment && ansible-playbook -i 00_inventory.yml -l staging deploy_playbook.yml --vault-password-file ~/.passvault.txt -e \"docker_image_tag=${targetVersion}\"'"
+                        sh "ssh yassine@192.168.0.5 'cd ansible-projects/devops-ansible-deployment && ansible-playbook -i 00_inventory.yml -l staging deploy_playbook.yml --vault-password-file ~/.passvault.txt -e \"docker_image_tag=${targetVersion}\"'"
                     }
                 }
             }
