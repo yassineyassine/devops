@@ -52,13 +52,14 @@ pipeline {
                 }
             }
         }
+        
         stage('Ansible job staging') {
             when {
-                expression { env.GIT_BRANCH == BRANCHE_PROD }
+                expression { env.GIT_BRANCH == BRANCHE_DEV }
             }
             steps {
                 script {
-                    def targetVersion = getEnvVersion("prod")
+                    def targetVersion = getEnvVersion("dev")
                     sshagent(credentials: ['ansible-node-manager']) {
                         sh "ssh user-ansible@192.168.0.5 'cd ansible-projects/devops-ansible-deployment && ansible-playbook -i 00_inventory.yml -l staging deploy_playbook.yml --vault-password-file ~/.passvault.txt -e \"docker_image_tag=${targetVersion}\"'"
                     }
@@ -66,6 +67,23 @@ pipeline {
             }
         }
 
+        stage('Ansible job production') {
+            when {
+                expression { env.GIT_BRANCH == BRANCHE_PROD }
+            }
+            steps {
+                script {
+                    def targetVersion = getEnvVersion("prod")
+                    sshagent(credentials: ['github-credentials']) {
+                        sh "git tag -f v${targetVersion}"
+                        sh "git push origin --tags HEAD:develop"
+                    }
+                    sshagent(credentials: ['ansible-node-manager']) {
+                        sh "ssh user-ansible@192.168.0.5 'cd ansible-projects/devops-ansible-deployment && ansible-playbook -i 00_inventory.yml -l production deploy_playbook.yml --vault-password-file ~/.passvault.txt -e \"docker_image_tag=${targetVersion}\"'"
+                    }
+                }
+            }
+        }
         
     }
 }
