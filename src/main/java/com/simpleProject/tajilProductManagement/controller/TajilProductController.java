@@ -22,6 +22,7 @@ import com.simpleProject.tajilProductManagement.service.TajilProductService;
 /*yassine changement controller 3*/
 /*yassine changement controller 4*/
 /*yassine changement controller 5*/
+/*yassine changement controller 6*/
 @RestController
 @RequestMapping("/tajilProduct")
 public class TajilProductController {
