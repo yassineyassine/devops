@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.simpleProject.tajilProductManagement.model.TajilProductModule;
 import com.simpleProject.tajilProductManagement.service.TajilProductService;
-/*yassine*/
+/*yassine changement controller 1*/
 @RestController
 @RequestMapping("/tajilProduct")
 public class TajilProductController {
