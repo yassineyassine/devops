@@ -1,0 +1,70 @@
+package com.simpleProject.mesEtudiantManagement.controller;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.simpleProject.mesEtudiantManagement.model.TajilProductModule;
+import com.simpleProject.mesEtudiantManagement.service.MesEtudiantService;
+/*yassine changement controller 1*/
+/*yassine changement controller 2*/
+/*yassine changement controller 3*/
+/*yassine changement controller 4*/
+/*yassine changement controller 5*/
+/*yassine changement controller 6*/
+@RestController
+@RequestMapping("/tajilProduct")
+public class TajilProductController {
+    private final MesEtudiantService mesEtudiantService;
+
+    public TajilProductController(MesEtudiantService mesEtudiantService) {
+        this.mesEtudiantService = mesEtudiantService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<TajilProductModule>> getAllTajilProducts(){
+        return new ResponseEntity<>(mesEtudiantService.getAllTajilProduct(), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<TajilProductModule> getTajilProductById(@PathVariable UUID id){
+        Optional<TajilProductModule> optionalTajilProduct = mesEtudiantService.getTajilProductByProductId(id);
+        if (optionalTajilProduct.isPresent()) {
+            return new ResponseEntity<>(optionalTajilProduct.get(), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PostMapping
+    public ResponseEntity<TajilProductModule> createNewTajilProduct(@RequestBody TajilProductModule tajilProduct){
+        return new ResponseEntity<>(mesEtudiantService.createTajilProduct(tajilProduct), HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<TajilProductModule> updateTajilProductById(@PathVariable UUID id, @RequestBody TajilProductModule tajilProduct){
+        Optional<TajilProductModule> optionalUpdateTajilProduct = mesEtudiantService.updateTajilProduct(id, tajilProduct);
+        if (optionalUpdateTajilProduct.isPresent()) {
+            return new ResponseEntity<>(optionalUpdateTajilProduct.get(), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<HttpStatus> deleteTajilProductById(@PathVariable UUID id){
+        mesEtudiantService.deleteTajilProduct(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+}
