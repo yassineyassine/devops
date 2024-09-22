@@ -1,4 +1,4 @@
-package com.simpleProject.tajilProductManagement.service;
+package com.simpleProject.mesEtudiantManagement.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,29 +7,29 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.simpleProject.tajilProductManagement.model.TajilProductModule;
+import com.simpleProject.mesEtudiantManagement.model.MesEtudiantModule;
 
 @Service
-public class TajilProductService {
-    private List<TajilProductModule> tajilProducts = new ArrayList<>();
+public class MesEtudiantService {
+    private List<MesEtudiantModule> tajilProducts = new ArrayList<>();
 
-    public List<TajilProductModule> getAllTajilProduct() {
+    public List<MesEtudiantModule> getAllTajilProduct() {
         return tajilProducts;
     }
 
-    public Optional<TajilProductModule> getTajilProductByProductId(UUID id){
+    public Optional<MesEtudiantModule> getTajilProductByProductId(UUID id){
         return tajilProducts.stream().filter(t -> t.getProductId().equals(id)).findFirst();
     }
 
-    public TajilProductModule createTajilProduct(TajilProductModule tajilProduct){
+    public MesEtudiantModule createTajilProduct(MesEtudiantModule tajilProduct){
         tajilProducts.add(tajilProduct);
         return tajilProduct;
     }
 
-    public Optional<TajilProductModule> updateTajilProduct(UUID id, TajilProductModule tajilProductDetails){
-        Optional<TajilProductModule> tajilProductOptional = getTajilProductByProductId(id);
+    public Optional<MesEtudiantModule> updateTajilProduct(UUID id, MesEtudiantModule tajilProductDetails){
+        Optional<MesEtudiantModule> tajilProductOptional = getTajilProductByProductId(id);
         if (tajilProductOptional.isPresent()) {
-            TajilProductModule tajilProduct = tajilProductOptional.get();
+            MesEtudiantModule tajilProduct = tajilProductOptional.get();
             tajilProduct.setProductName(tajilProductDetails.getProductName());
             tajilProduct.setProductDesciption(tajilProductDetails.getProductDesciption());
             tajilProduct.setProductPrice(tajilProductDetails.getProductPrice());

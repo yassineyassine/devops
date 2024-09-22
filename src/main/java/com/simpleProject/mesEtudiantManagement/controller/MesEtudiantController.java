@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.simpleProject.mesEtudiantManagement.model.TajilProductModule;
+import com.simpleProject.mesEtudiantManagement.model.MesEtudiantModule;
 import com.simpleProject.mesEtudiantManagement.service.MesEtudiantService;
 /*yassine changement controller 1*/
 /*yassine changement controller 2*/
@@ -24,22 +24,22 @@ import com.simpleProject.mesEtudiantManagement.service.MesEtudiantService;
 /*yassine changement controller 5*/
 /*yassine changement controller 6*/
 @RestController
-@RequestMapping("/tajilProduct")
-public class TajilProductController {
+@RequestMapping("/mesEtudiant")
+public class MesEtudiantController {
     private final MesEtudiantService mesEtudiantService;
 
-    public TajilProductController(MesEtudiantService mesEtudiantService) {
+    public MesEtudiantController(MesEtudiantService mesEtudiantService) {
         this.mesEtudiantService = mesEtudiantService;
     }
 
     @GetMapping
-    public ResponseEntity<List<TajilProductModule>> getAllTajilProducts(){
+    public ResponseEntity<List<MesEtudiantModule>> getAllTajilProducts(){
         return new ResponseEntity<>(mesEtudiantService.getAllTajilProduct(), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TajilProductModule> getTajilProductById(@PathVariable UUID id){
-        Optional<TajilProductModule> optionalTajilProduct = mesEtudiantService.getTajilProductByProductId(id);
+    public ResponseEntity<MesEtudiantModule> getTajilProductById(@PathVariable UUID id){
+        Optional<MesEtudiantModule> optionalTajilProduct = mesEtudiantService.getTajilProductByProductId(id);
         if (optionalTajilProduct.isPresent()) {
             return new ResponseEntity<>(optionalTajilProduct.get(), HttpStatus.OK);
         } else {
@@ -48,13 +48,13 @@ public class TajilProductController {
     }
 
     @PostMapping
-    public ResponseEntity<TajilProductModule> createNewTajilProduct(@RequestBody TajilProductModule tajilProduct){
+    public ResponseEntity<MesEtudiantModule> createNewTajilProduct(@RequestBody MesEtudiantModule tajilProduct){
         return new ResponseEntity<>(mesEtudiantService.createTajilProduct(tajilProduct), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TajilProductModule> updateTajilProductById(@PathVariable UUID id, @RequestBody TajilProductModule tajilProduct){
-        Optional<TajilProductModule> optionalUpdateTajilProduct = mesEtudiantService.updateTajilProduct(id, tajilProduct);
+    public ResponseEntity<MesEtudiantModule> updateTajilProductById(@PathVariable UUID id, @RequestBody MesEtudiantModule tajilProduct){
+        Optional<MesEtudiantModule> optionalUpdateTajilProduct = mesEtudiantService.updateTajilProduct(id, tajilProduct);
         if (optionalUpdateTajilProduct.isPresent()) {
             return new ResponseEntity<>(optionalUpdateTajilProduct.get(), HttpStatus.OK);
         } else {

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TajilProductModule {
+public class MesEtudiantModule {
     private UUID productId;
     private String productName;
     private String productDesciption;

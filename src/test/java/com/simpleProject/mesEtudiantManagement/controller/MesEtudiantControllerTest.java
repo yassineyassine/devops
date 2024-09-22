@@ -16,12 +16,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import com.simpleProject.mesEtudiantManagement.model.TajilProductModule;
+import com.simpleProject.mesEtudiantManagement.model.MesEtudiantModule;
 import com.simpleProject.mesEtudiantManagement.service.MesEtudiantService;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class TajilProductControllerTest {
+public class MesEtudiantControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -44,18 +44,15 @@ public class TajilProductControllerTest {
     void testGetAllTajilProducts() throws Exception {
         //Inisiator Data
         UUID id = UUID.randomUUID();
-        TajilProductModule tajilProducts = 
-            new TajilProductModule(
-                id, "Bakwan", 
-                "Gorengan yang terbuat dari tepung dan sayur yang berbebtuk pipih", 
-                "Gorengan", 1000, 9);
-        List<TajilProductModule> productList = Arrays.asList(tajilProducts);
+        MesEtudiantModule tajilProducts =
+            new MesEtudiantModule(id, "Bakwan", "Gorengan yang terbuat dari tepung dan sayur yang berbebtuk pipih", "Gorengan", 1000, 9);
+        List<MesEtudiantModule> productList = Arrays.asList(tajilProducts);
 
         // Set expectations on the mock service
         when(mesEtudiantService.getAllTajilProduct()).thenReturn(productList);
 
         mockMvc.perform(MockMvcRequestBuilders
-                .get("/tajilProduct")
+                .get("/mesEtudiant")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
