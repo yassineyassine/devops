@@ -20,6 +20,8 @@ pipeline {
 
 
         stage('Ansible job staging') {
+            envName = "prod"
+
             when {
                 expression { env.GIT_BRANCH == BRANCHE_DEV }
             }
@@ -41,6 +43,7 @@ pipeline {
                 script {
                     def targetVersion = getEnvVersion("prod")
                     sshagent(credentials: ['github-credentials']) {
+                        sh "git remote set-url origin git@github.com:yassineyassine/devops.git"
                         sh "git tag -f v${targetVersion}"
                         sh "git push origin --tags HEAD:develop"
                     }
