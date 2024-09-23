@@ -20,7 +20,7 @@ pipeline {
 
 
         stage('Ansible job staging') {
-            envName = "prod"
+
 
             when {
                 expression { env.GIT_BRANCH == BRANCHE_DEV }
