@@ -74,5 +74,5 @@ def getEnvVersion(envName) {
     }
     print 'build ${environnement} versions...'
     print versionNumber
-    return versionNumber
+    return artifactVersion
 }
