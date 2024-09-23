@@ -1,19 +1,40 @@
 pipeline {
     agent any
-    tools {
-        maven 'jenkins-maven'
-    }
-    environment {
-        BRANCHE_DEV = 'origin/develop'
-        BRANCHE_PROD = 'origin/main'
-        NEXUS_DOCKER_REGISTRY = "http://prod.local:5003"
-        NEXUS_CREDENTIALS_ID = "nexus-credentials"
-        DOCKER_IMAGE_NAME = "devops-project-samples"
-        DOCKER_IMAGE_TAG = "prod.local:5003"
-    }
+		tools {
+			maven 'jenkins-maven'
+		}
+		
+		environment {
+			BRANCHE_DEV = 'origin/develop'
+			BRANCHE_PROD = 'origin/main'
+			NEXUS_DOCKER_REGISTRY = "http://prod.local:5003"
+			NEXUS_CREDENTIALS_ID = "nexus-credentials"
+			DOCKER_IMAGE_NAME = "devops-project-samples"
+			DOCKER_IMAGE_TAG = "prod.local:5003"
+		}
 
 
+         stages {
 
+         stage('Checkout') {
+                     steps {
+                         checkout scm
+                         echo 'Pulling... ' + env.GIT_BRANCH
+                     }
+                 }
+
+                  stage('Maven Build and Package') {
+                             steps {
+                                 script {
+                                     sh 'mvn clean package -DskipTests'
+                                 }
+                             }
+                             post {
+                                 success {
+                                     archiveArtifacts 'target/*.jar'
+                                 }
+                             }
+                         }
        
                 stage('Docker Build and Push to Nexus') {
                     steps {
@@ -65,11 +86,9 @@ pipeline {
                     }
                 }
 
-
-
+        }
+	}
         
-    }
-}
 def getEnvVersion(envName) {
     def pom = readMavenPom file: 'pom.xml'
     // get the current development version
