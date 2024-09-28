@@ -10,10 +10,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MesEtudiantModule {
-    private UUID productId;
-    private String productName;
-    private String productDesciption;
-    private String productCategory;
-    private Integer productPrice;
-    private Integer productStock;
+    private UUID etudiantId;
+    private String etudiantFirstName;
+    private String etudiantLastName;
+    private String etudiantEmail;
+    private Integer etudiantCnssEtab;
+    private Integer etudiantCIN;
+
 }

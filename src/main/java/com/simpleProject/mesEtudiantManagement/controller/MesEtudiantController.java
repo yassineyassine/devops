@@ -39,7 +39,7 @@ public class MesEtudiantController {
 
     @GetMapping("/{id}")
     public ResponseEntity<MesEtudiantModule> getTajilProductById(@PathVariable UUID id){
-        Optional<MesEtudiantModule> optionalTajilProduct = mesEtudiantService.getTajilProductByProductId(id);
+        Optional<MesEtudiantModule> optionalTajilProduct = mesEtudiantService.getTajilProductByetudiantId(id);
         if (optionalTajilProduct.isPresent()) {
             return new ResponseEntity<>(optionalTajilProduct.get(), HttpStatus.OK);
         } else {

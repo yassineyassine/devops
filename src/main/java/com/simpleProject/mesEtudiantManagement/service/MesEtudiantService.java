@@ -17,8 +17,9 @@ public class MesEtudiantService {
         return tajilProducts;
     }
 
-    public Optional<MesEtudiantModule> getTajilProductByProductId(UUID id){
-        return tajilProducts.stream().filter(t -> t.getProductId().equals(id)).findFirst();
+    public Optional<MesEtudiantModule> getTajilProductByetudiantId(UUID id){
+        return tajilProducts.stream().filter(t -> t.getEtudiantId().equals(id)).findFirst();
+
     }
 
     public MesEtudiantModule createTajilProduct(MesEtudiantModule tajilProduct){
@@ -27,20 +28,20 @@ public class MesEtudiantService {
     }
 
     public Optional<MesEtudiantModule> updateTajilProduct(UUID id, MesEtudiantModule tajilProductDetails){
-        Optional<MesEtudiantModule> tajilProductOptional = getTajilProductByProductId(id);
+        Optional<MesEtudiantModule> tajilProductOptional = getTajilProductByetudiantId(id);
         if (tajilProductOptional.isPresent()) {
             MesEtudiantModule tajilProduct = tajilProductOptional.get();
-            tajilProduct.setProductName(tajilProductDetails.getProductName());
-            tajilProduct.setProductDesciption(tajilProductDetails.getProductDesciption());
-            tajilProduct.setProductPrice(tajilProductDetails.getProductPrice());
-            tajilProduct.setProductCategory(tajilProductDetails.getProductCategory());
-            tajilProduct.setProductStock(tajilProductDetails.getProductStock());
+            tajilProduct.setEtudiantFirstName(tajilProductDetails.getEtudiantFirstName());
+            tajilProduct.setEtudiantLastName(tajilProductDetails.getEtudiantLastName());
+            tajilProduct.setEtudiantCnssEtab(tajilProductDetails.getEtudiantCnssEtab());
+            tajilProduct.setEtudiantEmail(tajilProductDetails.getEtudiantEmail());
+            tajilProduct.setEtudiantCIN(tajilProductDetails.getEtudiantCIN());
         }
 
         return tajilProductOptional;
     }
 
     public void deleteTajilProduct(UUID id){
-        tajilProducts.removeIf(t -> t.getProductId().equals(id));
+        tajilProducts.removeIf(t -> t.getEtudiantId().equals(id));
     }
 }

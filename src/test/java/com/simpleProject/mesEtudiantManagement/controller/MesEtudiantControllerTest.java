@@ -56,11 +56,11 @@ public class MesEtudiantControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].productName").value("Bakwan"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].productDesciption").value("Gorengan yang terbuat dari tepung dan sayur yang berbebtuk pipih"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].productCategory").value("Gorengan"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].productPrice").value(1000))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].productStock").value(9));
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].etudiantFirstName").value("Bakwan"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].etudiantLastName").value("Gorengan yang terbuat dari tepung dan sayur yang berbebtuk pipih"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].etudiantEmail").value("Gorengan"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].etudiantCnssEtab").value(1000))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].etudiantCIN").value(9));
     }
 
     @Test

@@ -24,46 +24,46 @@ public class MesEtudiantModuleTest {
     }
 
     @Test
-    void testGetProductCategory() {
+    void testGetetudiantEmail() {
         MesEtudiantModule product = new MesEtudiantModule();
-        product.setProductCategory("Electronics");
-        assertEquals("Electronics", product.getProductCategory());
+        product.setEtudiantEmail("Electronics");
+        assertEquals("Electronics", product.getEtudiantEmail());
     }
 
     @Test
-    void testGetProductDesciption() {
+    void testGetetudiantLastName() {
         MesEtudiantModule product = new MesEtudiantModule();
-        product.setProductDesciption("This is a product");
-        assertEquals("This is a product", product.getProductDesciption());
+        product.setEtudiantLastName("This is a product");
+        assertEquals("This is a product", product.getEtudiantLastName());
     }
 
     @Test
-    void testGetProductId() {
+    void testGetetudiantId() {
         MesEtudiantModule product = new MesEtudiantModule();
         UUID id = UUID.randomUUID();
-        product.setProductId(id);
-        assertEquals(id, product.getProductId());
+        product.setEtudiantId(id);
+        assertEquals(id, product.getEtudiantId());
     }
 
     @Test
-    void testGetProductName() {
+    void testGetetudiantFirstName() {
         MesEtudiantModule product = new MesEtudiantModule();
-        product.setProductName("Product Name");
-        assertEquals("Product Name", product.getProductName());
+        product.setEtudiantFirstName("Product Name");
+        assertEquals("Product Name", product.getEtudiantFirstName());
     }
 
     @Test
-    void testGetProductPrice() {
+    void testGetetudiantCnssEtab() {
         MesEtudiantModule product = new MesEtudiantModule();
-        product.setProductPrice(100);
-        assertEquals(100, product.getProductPrice());
+        product.setEtudiantCnssEtab(100);
+        assertEquals(100, product.getEtudiantCnssEtab());
     }
 
     @Test
-    void testGetProductStock() {
+    void testGetetudiantCIN() {
         MesEtudiantModule product = new MesEtudiantModule();
-        product.setProductStock(10);
-        assertEquals(10, product.getProductStock());
+        product.setEtudiantCIN(10);
+        assertEquals(10, product.getEtudiantCIN());
     }
 
     @Test
@@ -73,46 +73,46 @@ public class MesEtudiantModuleTest {
     }
 
     @Test
-    void testSetProductCategory() {
+    void testSetetudiantEmail() {
         MesEtudiantModule product = new MesEtudiantModule();
-        product.setProductCategory("Electronics");
-        assertEquals("Electronics", product.getProductCategory());
+        product.setEtudiantEmail("Electronics");
+        assertEquals("Electronics", product.getEtudiantEmail());
     }
 
     @Test
-    void testSetProductDesciption() {
+    void testSetetudiantLastName() {
         MesEtudiantModule product = new MesEtudiantModule();
-        product.setProductDesciption("This is a product");
-        assertEquals("This is a product", product.getProductDesciption());
+        product.setEtudiantLastName("This is a product");
+        assertEquals("This is a product", product.getEtudiantLastName());
     }
 
     @Test
-    void testSetProductId() {
+    void testSetetudiantId() {
         MesEtudiantModule product = new MesEtudiantModule();
         UUID id = UUID.randomUUID();
-        product.setProductId(id);
-        assertEquals(id, product.getProductId());
+        product.setEtudiantId(id);
+        assertEquals(id, product.getEtudiantId());
     }
 
     @Test
-    void testSetProductName() {
+    void testSetetudiantFirstName() {
         MesEtudiantModule product = new MesEtudiantModule();
-        product.setProductName("Product Name");
-        assertEquals("Product Name", product.getProductName());
+        product.setEtudiantFirstName("Product Name");
+        assertEquals("Product Name", product.getEtudiantFirstName());
     }
 
     @Test
-    void testSetProductPrice() {
+    void testSetetudiantCnssEtab() {
         MesEtudiantModule product = new MesEtudiantModule();
-        product.setProductPrice(100);
-        assertEquals(100, product.getProductPrice());
+        product.setEtudiantCnssEtab(100);
+        assertEquals(100, product.getEtudiantCnssEtab());
     }
 
     @Test
-    void testSetProductStock() {
+    void testSetetudiantCIN() {
         MesEtudiantModule product = new MesEtudiantModule();
-        product.setProductStock(10);
-        assertEquals(10, product.getProductStock());
+        product.setEtudiantCIN(10);
+        assertEquals(10, product.getEtudiantCIN());
     }
 
     @Test
