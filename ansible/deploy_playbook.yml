@@ -29,5 +29,5 @@
         name: "{{ docker_container_name }}"
         image: "{{ nexus_registry_url }}/{{ docker_image_name }}:{{ docker_image_tag }}"
         ports:
-          - "{{ docker_container_port }}:7070"
+          - "{{ docker_container_port }}:8084"
         state: started
