@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# Configuration
+REPO_LIST="repositories.txt"
+WORK_DIR="microservices_commits"
+OUTPUT_FILE="commits_report.txt"
+
+# Créer le répertoire de travail s'il n'existe pas
+mkdir -p "$WORK_DIR"
+
+# Initialiser le fichier de sortie
+echo "Commits Since Last Tag Report" > "$OUTPUT_FILE"
+echo "Generated on: $(date)" >> "$OUTPUT_FILE"
+echo "===================================" >> "$OUTPUT_FILE"
+
+# Parcourir chaque dépôt
+while IFS= read -r line; do
+  SERVICE_NAME=$(echo $line | awk '{print $1}')
+  REPO_URL=$(echo $line | awk '{print $2}')
+  REPO_DIR="$WORK_DIR/$SERVICE_NAME"
+
+  echo "Processing $SERVICE_NAME..."
+
+  # Cloner ou mettre à jour le dépôt
+  if [ -d "$REPO_DIR/.git" ]; then
+    git -C "$REPO_DIR" pull
+  else
+    git clone "$REPO_URL" "$REPO_DIR"
+  fi
+
+  # Obtenir le dernier tag
+  LAST_TAG=$(git -C "$REPO_DIR" describe --tags --abbrev=0 2>/dev/null)
+
+  if [ -z "$LAST_TAG" ]; then
+    echo "No tags found in $SERVICE_NAME. Skipping..." >> "$OUTPUT_FILE"
+    continue
+  fi
+
+  # Extraire les commits entre le dernier tag et HEAD
+  COMMITS=$(git -C "$REPO_DIR" log "$LAST_TAG"..HEAD --pretty=format:"%h - %s (%an, %ad)" --date=short)
+
+  if [ -z "$COMMITS" ]; then
+    echo "No commits found between $LAST_TAG and HEAD for $SERVICE_NAME." >> "$OUTPUT_FILE"
+    continue
+  fi
+
+  echo "Commits for $SERVICE_NAME since $LAST_TAG:" >> "$OUTPUT_FILE"
+  echo "$COMMITS" >> "$OUTPUT_FILE"
+  echo "" >> "$OUTPUT_FILE"
+
+done < "$REPO_LIST"
+
+echo "Commit report saved in $OUTPUT_FILE."
