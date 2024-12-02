@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# Configuration
+REPO_LIST="repositories.txt"
+WORK_DIR="projects"
+NUM_COMMITS=5  # Nombre de commits à afficher
+
+# Vérifier si le fichier de dépôts existe
+if [ ! -f "$REPO_LIST" ]; then
+  echo "Le fichier $REPO_LIST est introuvable."
+  exit 1
+fi
+
+# Créer le répertoire de travail s'il n'existe pas
+mkdir -p "$WORK_DIR"
+
+# Parcourir les dépôts
+while IFS= read -r repo_url; do
+  # Extraire le nom du dépôt
+  REPO_NAME=$(basename "$repo_url" .git)
+  REPO_DIR="$WORK_DIR/$REPO_NAME"
+
+  # Cloner ou mettre à jour le dépôt
+  if [ -d "$REPO_DIR/.git" ]; then
+    echo "Mise à jour du dépôt $REPO_NAME..."
+    git -C "$REPO_DIR" pull
+  else
+    echo "Clonage du dépôt $REPO_NAME..."
+    git clone "$repo_url" "$REPO_DIR"
+  fi
+
+  # Récupérer les derniers commits
+  echo ""
+  echo "Derniers commits pour $REPO_NAME :"
+  git -C "$REPO_DIR" log -n $NUM_COMMITS --pretty=format:"%h - %s (%an, %ad)" --date=short
+
+done < "$REPO_LIST"
+
+echo ""
+echo "Extraction des commits terminée."
