@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# Configuration
+TOKEN="your_gitlab_access_token"
+PROJECT_ID="your_project_id"
+BRANCH="main"
+FILE_PATH="update_or_create.txt"
+FILE_CONTENT="This is the new content."
+COMMIT_MESSAGE="Create or update file via API"
+
+# API Endpoint
+GITLAB_API="https://gitlab.com/api/v4"
+
+# Vérifier si le fichier existe
+FILE_EXISTS=$(curl --silent --header "PRIVATE-TOKEN: $TOKEN" \
+  --head "$GITLAB_API/projects/$PROJECT_ID/repository/files/$FILE_PATH?ref=$BRANCH" \
+  | grep "HTTP/2 200")
+
+if [ -n "$FILE_EXISTS" ]; then
+  # Mettre à jour le fichier
+  RESPONSE=$(curl --silent --write-out "%{http_code}" --output /dev/null \
+    --request PUT "$GITLAB_API/projects/$PROJECT_ID/repository/files/$FILE_PATH" \
+    --header "PRIVATE-TOKEN: $TOKEN" \
+    --header "Content-Type: application/json" \
+    --data '{
+      "branch": "'"$BRANCH"'",
+      "content": "'"$FILE_CONTENT"'",
+      "commit_message": "'"$COMMIT_MESSAGE"'"
+    }')
+
+  if [ "$RESPONSE" -eq 200 ]; then
+    echo "Le fichier $FILE_PATH a été mis à jour avec succès."
+  else
+    echo "Échec de la mise à jour du fichier. Code de réponse HTTP : $RESPONSE"
+  fi
+else
+  # Créer le fichier
+  RESPONSE=$(curl --silent --write-out "%{http_code}" --output /dev/null \
+    --request POST "$GITLAB_API/projects/$PROJECT_ID/repository/files/$FILE_PATH" \
+    --header "PRIVATE-TOKEN: $TOKEN" \
+    --header "Content-Type: application/json" \
+    --data '{
+      "branch": "'"$BRANCH"'",
+      "content": "'"$FILE_CONTENT"'",
+      "commit_message": "'"$COMMIT_MESSAGE"'"
+    }')
+
+  if [ "$RESPONSE" -eq 201 ]; then
+    echo "Le fichier $FILE_PATH a été créé avec succès."
+  else
+    echo "Échec de la création du fichier. Code de réponse HTTP : $RESPONSE"
+  fi
+fi
