@@ -1,0 +1,13 @@
+stages:
+  - update-file
+
+update_file_job:
+  stage: update-file
+  script:
+    - echo "Début de l'opération de création ou mise à jour"
+    - bash ./scripts/gitlab_create_or_replace_file.sh
+  only:
+    - main
+  variables:
+    GITLAB_TOKEN: $CI_JOB_TOKEN
+    GITLAB_PROJECT_ID: $CI_PROJECT_ID
