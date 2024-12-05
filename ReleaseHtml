@@ -1,6 +1,65 @@
 #!/bin/bash
 
 # Fichier de sortie HTML
+output_file="git_log_table.html"
+
+# Début du fichier HTML
+echo "<!DOCTYPE html>
+<html lang=\"en\">
+<head>
+    <meta charset=\"UTF-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+    <title>Git Log Table</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Git Log Table</h1>
+    <table>
+        <tr>
+            <th>Hash</th>
+            <th>Message</th>
+            <th>Auteur</th>
+            <th>Date</th>
+        </tr>" > "$output_file"
+
+# Extraire les logs Git et les ajouter au tableau
+git log --pretty=format:"%h|%s|%an|%ad" --date=short | while IFS="|" read -r hash message author date; do
+    echo "        <tr>
+            <td>${hash}</td>
+            <td>${message}</td>
+            <td>${author}</td>
+            <td>${date}</td>
+        </tr>" >> "$output_file"
+done
+
+# Fin du fichier HTML
+echo "    </table>
+</body>
+</html>" >> "$output_file"
+
+# Message de confirmation
+echo "Fichier HTML généré : $output_file"
+
+
+
+#!/bin/bash
+
+# Fichier de sortie HTML
 output_file="output.html"
 
 # Début du fichier HTML
