@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# Fichier de sortie HTML
+output_file="output.html"
+
+# Début du fichier HTML
+echo "<!DOCTYPE html>
+<html lang=\"en\">
+<head>
+    <meta charset=\"UTF-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+    <title>Tableau des Données</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tableau des Données</h1>
+    <table>
+        <tr>
+            <th>Hash</th>
+            <th>Message</th>
+            <th>Auteur</th>
+            <th>Date</th>
+        </tr>" > "$output_file"
+
+# Exemple de données (vous pouvez les remplacer par des données dynamiques)
+data=(
+    "abc123|feat: add login feature|John Doe|2023-12-01"
+    "def456|fix: resolve API bug|Jane Smith|2023-12-02"
+    "ghi789|chore: update dependencies|John Doe|2023-12-03"
+)
+
+# Ajout des lignes au tableau
+for row in "${data[@]}"; do
+    IFS="|" read -r hash message author date <<< "$row"
+    echo "        <tr>
+            <td>${hash}</td>
+            <td>${message}</td>
+            <td>${author}</td>
+            <td>${date}</td>
+        </tr>" >> "$output_file"
+done
+
+# Fin du fichier HTML
+echo "    </table>
+</body>
+</html>" >> "$output_file"
+
+# Message de confirmation
+echo "Fichier HTML généré : $output_file"
