@@ -1,0 +1,23 @@
+Afin de faciliter la lecture et la filtration des historique de message de commit doit avoir le format suivant:
+
+[AGS-numTicketCaliTrack]<type>(<scope>): message
+<body>
+<footer>
+
+<type>: type de changement effectué: feat, fix…
+<scope>: Section du code concerné: Titre, Taux
+<message>: Description du changement
+
+Les type:
+feat: nouvelle fonctionnalités
+fix: Correction d’un bug
+config: Tâche de maintenance
+docs: Mise à jour de la documentation
+style: Modification du code sans changement du logique
+perf: Modification du code sans changement du logique
+test: Ajout ou  modification des test
+db: Ajout ou  modification des tests
+
+Exemple Complet:
+
+[AGS-3445]feat(titre): add Jwt authentification
