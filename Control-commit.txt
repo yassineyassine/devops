@@ -18,3 +18,8 @@ fi
 
 echo "Commit message is valid."
 exit 0
+
+
+git commit -m "Titre du commit^
+^
+Description détaillée avec un retour à la ligne."
