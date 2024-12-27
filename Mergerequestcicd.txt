@@ -1,0 +1,20 @@
+validate_mr_title:
+  stage: test
+  script:
+    - echo "Vérification du titre de la Merge Request..."
+    - |
+      if [[ -z "$CI_MERGE_REQUEST_TITLE" ]]; then
+        echo "❌ ERREUR : Aucun titre de Merge Request trouvé."
+        exit 1
+      fi
+      # Vérifiez le format du titre de la Merge Request
+      regex="^(feat|fix|docs|style|refactor|test|chore)[a-zA-Z0-9_-]+: .+$"
+      if [[ ! "$CI_MERGE_REQUEST_TITLE" =~ $regex ]]; then
+        echo "❌ ERREUR : Le titre de la Merge Request est invalide."
+        echo "Le titre doit suivre le format : '<type>(<scope>): <message>'"
+        echo "Exemple valide : feat(UI): Add dark mode support"
+        exit 1
+      fi
+      echo "✅ Le titre de la Merge Request est valide."
+  only:
+    - merge_requests
