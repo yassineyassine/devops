@@ -23,3 +23,29 @@ exit 0
 git commit -m "Titre du commit^
 ^
 Description détaillée avec un retour à la ligne."
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <File name="alimsenapAppender" fileName="${catalina.base}/logs/alimsenap.log">
+            <PatternLayout pattern="[%d] %-5p %c{2}:%L - %m%n"/>
+        </File>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="fr.gouv.impots.appli.common.frameworks.gestionlogs.log4j.appenders.ArchiveDgfipFileAppender" level="INFO" additivity="false">
+            <AppenderRef ref="alimsenapAppender"/>
+        </Logger>
+
+        <Logger name="fr.gouv.impots.appli.alimsenap" level="INFO" additivity="false">
+            <AppenderRef ref="alimsenapAppender"/>
+        </Logger>
+
+        <Logger name="fr.gouv.impots.appli.common" level="ERROR" additivity="false">
+            <AppenderRef ref="alimsenapAppender"/>
+        </Logger>
+
+        <Root level="INFO">
+            <AppenderRef ref="alimsenapAppender"/>
+        </Root>
+    </Loggers>
+</Configuration>
