@@ -1,0 +1,195 @@
+package mon.package.log;
+
+import java.io.*;
+import java.nio.file.*;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
+import org.apache.logging.log4j.*;
+import org.apache.logging.log4j.core.*;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.plugins.*;
+import org.apache.logging.log4j.core.layout.PatternLayout;
+import org.apache.logging.log4j.core.Filter;
+import org.apache.logging.log4j.core.LogEvent;
+
+@Plugin(name = "ArchiveDgfipFileAppender", category = "Core", elementType = "appender", printObject = true)
+public class ArchiveDgfipFileAppender extends AbstractAppender {
+
+    private static final Logger LOGGER = LogManager.getLogger(ArchiveDgfipFileAppender.class);
+
+    private final String fileName;
+    private final int retentionDays;
+
+    private File fichierLog;
+    private OutputStream outputStream;
+    private long dateProchainRoll;
+
+    protected ArchiveDgfipFileAppender(String name, Filter filter, Layout<? extends Serializable> layout,
+                                       boolean ignoreExceptions, String fileName, int retentionDays) {
+        super(name, filter, layout, ignoreExceptions);
+        this.fileName = fileName;
+        this.retentionDays = retentionDays;
+        initialize();
+    }
+
+    private void initialize() {
+        try {
+            fichierLog = new File(fileName);
+
+            if (fichierLog.exists()) {
+                if (fichierLog.lastModified() < getStartOfTodayInMillis()) {
+                    roulementQuotidien();
+                } else {
+                    roulementReprise();
+                }
+            }
+
+            outputStream = new FileOutputStream(fichierLog, true);
+            setDateProchainRoll();
+
+        } catch (IOException e) {
+            LOGGER.error("Erreur lors de l'initialisation de l'appender", e);
+        }
+    }
+
+    private long getStartOfTodayInMillis() {
+        GregorianCalendar cal = getDateDebutJour();
+        return cal.getTimeInMillis();
+    }
+
+    private GregorianCalendar getDateDebutJour() {
+        GregorianCalendar cal = new GregorianCalendar();
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal;
+    }
+
+    private void setDateProchainRoll() {
+        GregorianCalendar dateActuelle = getDateDebutJour();
+        dateActuelle.add(Calendar.DAY_OF_MONTH, 1); // Demain à minuit
+        dateProchainRoll = dateActuelle.getTimeInMillis();
+    }
+
+    private void roulement(String extension) {
+        try {
+            String baseName = fichierLog.getName().replace(".log", "");
+            String nomDestination = fichierLog.getParent() + File.separator + baseName + extension;
+
+            LOGGER.debug("Génération du fichier de roulement : {}", nomDestination);
+
+            zipFile(fichierLog, new File(nomDestination));
+
+            if (!fichierLog.delete()) {
+                LOGGER.warn("Impossible de supprimer le fichier log original : {}", fichierLog.getAbsolutePath());
+            }
+
+            fichierLog = new File(fileName);
+            outputStream = new FileOutputStream(fichierLog, false);
+
+        } catch (IOException e) {
+            LOGGER.warn("Erreur lors du roulement du fichier log : {}", fileName, e);
+        }
+    }
+
+    private void roulementQuotidien() {
+        String extension = "-" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date(fichierLog.lastModified())) + ".zip";
+        roulement(extension);
+        purgeArchive();
+    }
+
+    private void roulementReprise() {
+        String extension = "-reprise-" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()) + ".zip";
+        roulement(extension);
+        purgeArchive();
+    }
+
+    private void purgeArchive() {
+        try {
+            File dir = new File(fichierLog.getParent());
+            if (!dir.exists()) return;
+
+            File[] files = dir.listFiles((d, name) -> name.endsWith(".zip"));
+            if (files == null) return;
+
+            long cutoff = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(retentionDays);
+            for (File file : files) {
+                if (file.lastModified() < cutoff) {
+                    LOGGER.info("Fichier archive à supprimer : {}", file.getName());
+                    file.delete();
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("Erreur lors de la purge des fichiers archives", e);
+        }
+    }
+
+    private void zipFile(File source, File destination) throws IOException {
+        try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(destination));
+             FileInputStream fis = new FileInputStream(source)) {
+
+            zos.putNextEntry(new ZipEntry(source.getName()));
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = fis.read(buffer)) > 0) {
+                zos.write(buffer, 0, length);
+            }
+            zos.closeEntry();
+        }
+    }
+
+    @Override
+    public void append(LogEvent event) {
+        try {
+            long now = System.currentTimeMillis();
+
+            if (now >= dateProchainRoll) {
+                roulementQuotidien();
+                setDateProchainRoll();
+            }
+
+            byte[] data = getLayout().toByteArray(event);
+            outputStream.write(data);
+            outputStream.flush();
+        } catch (IOException e) {
+            LOGGER.error("Erreur lors de l'écriture du log", e);
+        }
+    }
+
+    @Override
+    public boolean stop(long timeout, TimeUnit timeUnit) {
+        try {
+            if (outputStream != null) {
+                outputStream.close();
+            }
+        } catch (IOException e) {
+            LOGGER.warn("Erreur lors de la fermeture du flux", e);
+        }
+        return super.stop(timeout, timeUnit);
+    }
+
+    @PluginFactory
+    public static ArchiveDgfipFileAppender createAppender(
+            @PluginAttribute("name") String name,
+            @PluginAttribute("fileName") String fileName,
+            @PluginAttribute(value = "retentionDays", defaultInt = 7) int retentionDays,
+            @PluginElement("Layout") Layout<? extends Serializable> layout,
+            @PluginElement("Filter") final Filter filter) {
+
+        if (name == null) {
+            LOGGER.error("Nom de l'appender manquant");
+            return null;
+        }
+
+        if (layout == null) {
+            layout = PatternLayout.createDefaultLayout();
+        }
+
+        return new ArchiveDgfipFileAppender(name, filter, layout, true, fileName, retentionDays);
+    }
+}
