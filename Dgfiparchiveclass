@@ -5,6 +5,7 @@ import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -21,18 +22,33 @@ public class ArchiveDgfipFileAppender extends AbstractAppender {
 
     private static final Logger LOGGER = LogManager.getLogger(ArchiveDgfipFileAppender.class);
 
+    // Constantes
+    private static final int BUFFER = 2048;
+
+    private static final String PATTERNQUOTIDIEN = "yyyy-MM-dd";
+    private static final String PATTERNREDEMARRAGE = PATTERNQUOTIDIEN + "'-HH-mm-ss'";
+    private static final String EXTENSIONCOMPRESS = ".zip";
+
+    private static final SimpleDateFormat SDFQUOTIDIEN = new SimpleDateFormat(PATTERNQUOTIDIEN, Locale.FRANCE);
+    private static final SimpleDateFormat SDFREDEMARRAGE = new SimpleDateFormat(PATTERNREDEMARRAGE, Locale.FRANCE);
+
+    private static final int DECALAGE = Calendar.DATE;
+
+    // Attributs configurables
     private final String fileName;
     private final int retentionDays;
 
+    // État interne
     private File fichierLog;
     private OutputStream outputStream;
     private long dateProchainRoll;
+    private final ReentrantLock lock = new ReentrantLock();
 
-    protected ArchiveDgfipFileAppender(String name, Filter filter, Layout<? extends Serializable> layout,
-                                       boolean ignoreExceptions, String fileName, int retentionDays) {
+    public ArchiveDgfipFileAppender(String name, Filter filter, Layout<? extends Serializable> layout,
+                                    boolean ignoreExceptions, String fileName, int retentionDays) {
         super(name, filter, layout, ignoreExceptions);
         this.fileName = fileName;
-        this.retentionDays = retentionDays;
+        this.retentionDays = retentionDays > 0 ? retentionDays : 30;
         initialize();
     }
 
@@ -57,8 +73,7 @@ public class ArchiveDgfipFileAppender extends AbstractAppender {
     }
 
     private long getStartOfTodayInMillis() {
-        GregorianCalendar cal = getDateDebutJour();
-        return cal.getTimeInMillis();
+        return getDateDebutJour().getTimeInMillis();
     }
 
     private GregorianCalendar getDateDebutJour() {
@@ -72,14 +87,16 @@ public class ArchiveDgfipFileAppender extends AbstractAppender {
 
     private void setDateProchainRoll() {
         GregorianCalendar dateActuelle = getDateDebutJour();
-        dateActuelle.add(Calendar.DAY_OF_MONTH, 1); // Demain à minuit
+        dateActuelle.add(DECALAGE, 1); // Demain à minuit
         dateProchainRoll = dateActuelle.getTimeInMillis();
     }
 
-    private void roulement(String extension) {
+    private void roulement(String suffixeHorodatage) {
         try {
+            lock.lock();
+
             String baseName = fichierLog.getName().replace(".log", "");
-            String nomDestination = fichierLog.getParent() + File.separator + baseName + extension;
+            String nomDestination = fichierLog.getParent() + File.separator + baseName + suffixeHorodatage + EXTENSIONCOMPRESS;
 
             LOGGER.debug("Génération du fichier de roulement : {}", nomDestination);
 
@@ -94,18 +111,20 @@ public class ArchiveDgfipFileAppender extends AbstractAppender {
 
         } catch (IOException e) {
             LOGGER.warn("Erreur lors du roulement du fichier log : {}", fileName, e);
+        } finally {
+            lock.unlock();
         }
     }
 
     private void roulementQuotidien() {
-        String extension = "-" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date(fichierLog.lastModified())) + ".zip";
-        roulement(extension);
+        String horodatage = "-" + SDFQUOTIDIEN.format(new Date(fichierLog.lastModified()));
+        roulement(horodatage);
         purgeArchive();
     }
 
     private void roulementReprise() {
-        String extension = "-reprise-" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()) + ".zip";
-        roulement(extension);
+        String horodatage = "-reprise-" + SDFREDEMARRAGE.format(new Date());
+        roulement(horodatage);
         purgeArchive();
     }
 
@@ -114,7 +133,7 @@ public class ArchiveDgfipFileAppender extends AbstractAppender {
             File dir = new File(fichierLog.getParent());
             if (!dir.exists()) return;
 
-            File[] files = dir.listFiles((d, name) -> name.endsWith(".zip"));
+            File[] files = dir.listFiles((d, name) -> name.endsWith(EXTENSIONCOMPRESS));
             if (files == null) return;
 
             long cutoff = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(retentionDays);
@@ -134,7 +153,7 @@ public class ArchiveDgfipFileAppender extends AbstractAppender {
              FileInputStream fis = new FileInputStream(source)) {
 
             zos.putNextEntry(new ZipEntry(source.getName()));
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[BUFFER];
             int length;
             while ((length = fis.read(buffer)) > 0) {
                 zos.write(buffer, 0, length);
@@ -177,7 +196,7 @@ public class ArchiveDgfipFileAppender extends AbstractAppender {
     public static ArchiveDgfipFileAppender createAppender(
             @PluginAttribute("name") String name,
             @PluginAttribute("fileName") String fileName,
-            @PluginAttribute(value = "retentionDays", defaultInt = 7) int retentionDays,
+            @PluginAttribute(value = "retentionDays", defaultInt = 30) int retentionDays,
             @PluginElement("Layout") Layout<? extends Serializable> layout,
             @PluginElement("Filter") final Filter filter) {
 
