@@ -1,0 +1,101 @@
+package test.appli.aliameapb.coordination.adaptateur.pivot;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+
+import javax.activation.DataHandler;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import appli.aliameapb.coordination.adaptateur.pivot.ExtraireDepotsAdaptateur;
+import appli.aliameapb.outil.base.ContexteApplicatif;
+import appli.aliameapb.service.ServiceAssistantInterface;
+import appli.aliameapb.valeur.BlocResponsePJ;
+import appli.aliameapb.valeur.ResponsePJ;
+import appli.aliameapb.constante.Parametres;
+import appli.aliameapb.constante.Constante;
+
+@ExtendWith(MockitoExtension.class)
+class ExtraireDepotsAdaptateurTest {
+
+    @Mock
+    private ContexteApplicatif contexte;
+
+    @Mock
+    private ServiceAssistantInterface serviceAssistant;
+
+    @Mock
+    private DataHandler dataHandler;
+
+    @Mock
+    private BlocResponsePJ blocResponse;
+
+    private InputStream inputStream;
+
+    @BeforeEach
+    void setup() throws Exception {
+        String contenu = "id1;id2;id3";
+        inputStream = new ByteArrayInputStream(contenu.getBytes(StandardCharsets.UTF_8));
+        when(dataHandler.getInputStream()).thenReturn(inputStream);
+    }
+
+    @Test
+    void testRechercherIdDepots_casNominal() throws Exception {
+        when(contexte.recupererObjet(Parametres.KEY_DATE_DEBUT)).thenReturn(new Date());
+        when(contexte.recupererObjet(Parametres.KEY_DATE_FIN)).thenReturn(new Date());
+        when(contexte.recupererObjet(Parametres.KEY_LISTE_FORMULAIRES)).thenReturn("F1;F2");
+        when(contexte.recupererObjet(Parametres.KEY_TYPE_BATCH)).thenReturn("TYPE_BATCH");
+        when(contexte.recupererObjet(Constante.KEY_NOMCJ)).thenReturn("NOMCJ");
+
+        ResponsePJ responsePJ = mock(ResponsePJ.class);
+        when(responsePJ.getResponse()).thenReturn(blocResponse);
+        when(responsePJ.getPj()).thenReturn(dataHandler);
+
+        ResponsePJ[] tableauReponses = new ResponsePJ[] { responsePJ };
+
+        // Hypothèse : méthode statique pour injecter le service mocké
+        ExtraireDepotsAdaptateur.setServiceAssistant(serviceAssistant);
+        when(serviceAssistant.invoker(any(), anyString(), any(), any(), any()))
+            .thenReturn(tableauReponses);
+
+        BlocResponsePJ result = ExtraireDepotsAdaptateur.rechercherIdDepots(contexte);
+
+        assertNotNull(result);
+        assertEquals(blocResponse, result);
+        verify(contexte).ajouterObjet(eq(Constante.EXTRAIRE_DEPOTS_NOM_PJ), any());
+        verify(contexte).ajouterObjet(eq(Parametres.KEY_NB_IDENTIFIANTS), any());
+    }
+
+    @Test
+    void testRechercherIdDepots_pieceJointeIOException() throws Exception {
+        when(contexte.recupererObjet(Parametres.KEY_DATE_DEBUT)).thenReturn(new Date());
+        when(contexte.recupererObjet(Parametres.KEY_DATE_FIN)).thenReturn(new Date());
+        when(contexte.recupererObjet(Parametres.KEY_LISTE_FORMULAIRES)).thenReturn("F1;F2");
+        when(contexte.recupererObjet(Parametres.KEY_TYPE_BATCH)).thenReturn("TYPE_BATCH");
+        when(contexte.recupererObjet(Constante.KEY_NOMCJ)).thenReturn("NOMCJ");
+
+        when(dataHandler.getInputStream()).thenThrow(new java.io.IOException("Erreur I/O"));
+
+        ResponsePJ responsePJ = mock(ResponsePJ.class);
+        when(responsePJ.getResponse()).thenReturn(blocResponse);
+        when(responsePJ.getPj()).thenReturn(dataHandler);
+
+        when(serviceAssistant.invoker(any(), anyString(), any(), any(), any()))
+            .thenReturn(new ResponsePJ[] { responsePJ });
+
+        ExtraireDepotsAdaptateur.setServiceAssistant(serviceAssistant);
+
+        assertThrows(Exception.class, () -> {
+            ExtraireDepotsAdaptateur.rechercherIdDepots(contexte);
+        });
+    }
+}
